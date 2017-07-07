@@ -9,6 +9,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mycompany.itunesapi.iTunesApi;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -50,9 +55,13 @@ public class ApiGui extends javax.swing.JFrame {
         checkButton = new javax.swing.JButton();
         sourceButton = new javax.swing.JButton();
         clearButton = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        destinationFolderLabel = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
+        copyMenuItem = new javax.swing.JMenuItem();
+        pasteMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -66,13 +75,40 @@ public class ApiGui extends javax.swing.JFrame {
         });
 
         sourceButton.setText("SOURCE");
+        sourceButton.setEnabled(false);
 
         clearButton.setText("CLEAR");
+        clearButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearButtonActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setText("Destination Folder:");
 
         jMenu1.setText("File");
         jMenuBar1.add(jMenu1);
 
         jMenu2.setText("Edit");
+
+        copyMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, java.awt.event.InputEvent.META_MASK));
+        copyMenuItem.setText("Copy");
+        copyMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                copyMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu2.add(copyMenuItem);
+
+        pasteMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_V, java.awt.event.InputEvent.META_MASK));
+        pasteMenuItem.setText("Paste");
+        pasteMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pasteMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu2.add(pasteMenuItem);
+
         jMenuBar1.add(jMenu2);
 
         setJMenuBar(jMenuBar1);
@@ -82,37 +118,41 @@ public class ApiGui extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(144, 144, 144)
-                .addComponent(artistsLabel)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(33, 33, 33)
-                .addComponent(artistsTextArea, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(clearButton)
-                    .addComponent(checkButton)
-                    .addComponent(sourceButton))
-                .addContainerGap(20, Short.MAX_VALUE))
+                .addGap(32, 32, 32)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addGap(18, 18, 18)
+                        .addComponent(sourceButton))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(artistsLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(checkButton))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(artistsTextArea, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(clearButton))
+                    .addComponent(destinationFolderLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(80, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(19, 19, 19)
-                .addComponent(artistsLabel)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
-                        .addComponent(artistsTextArea, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
-                        .addComponent(sourceButton)
-                        .addGap(43, 43, 43)
-                        .addComponent(checkButton)
-                        .addGap(48, 48, 48)
-                        .addComponent(clearButton)
-                        .addGap(52, 52, 52))))
+                .addContainerGap(11, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(sourceButton))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(destinationFolderLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(25, 25, 25)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(artistsLabel)
+                    .addComponent(checkButton))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(clearButton)
+                    .addComponent(artistsTextArea, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(33, 33, 33))
         );
 
         pack();
@@ -143,23 +183,33 @@ public class ApiGui extends javax.swing.JFrame {
 
                     //JSONObject jsonObj = new JSONObject(json);
                     JsonArray jArray = json.get("results").getAsJsonArray();
-
+                    int checkEquallity = 0;
                     for (int i = 0; i < jArray.size(); i++) {
 
                         JsonObject jsonObjArr = jArray.get(i).getAsJsonObject();
                         System.out.println("JSON OBJECTS INSIDE ARRAY: " + jsonObjArr.toString());
-                        String name = jsonObjArr.get("artistName").getAsString();
+                        String nameLowerCase = jsonObjArr.get("artistName").getAsString().toLowerCase();
 
-                        if (name.equals(tmp)) {
-
-                            JOptionPane.showMessageDialog(this, "ARTIS FOUND!\n" + name);
+                        if (nameLowerCase.equals(tmp.toLowerCase())) {
+                            checkEquallity = 1;
+                            JOptionPane.showMessageDialog(this, "ARTIST FOUND!\n" + nameLowerCase);
                             return;
                         }
 
                     }
 
+                    if (checkEquallity == 0) {
+                        JOptionPane.showMessageDialog(this, "ARTIST NOT FOUND!\n");
+                        return;
+
+                    }
+
                     //JSONArray jArray = new JSONArray(json.get("results"));
                     System.out.println("JARRAY: " + jArray.toString());
+                } else {
+                    JOptionPane.showMessageDialog(this, "ARTIST NOT FOUND!\n");
+                    return;
+
                 }
 
             }
@@ -170,7 +220,32 @@ public class ApiGui extends javax.swing.JFrame {
             }
         }
 
+        JOptionPane.showMessageDialog(this, "ERROR!\nPlease contact the developer", "Error", JOptionPane.ERROR_MESSAGE);
+
     }//GEN-LAST:event_checkButtonActionPerformed
+
+    private void pasteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pasteMenuItemActionPerformed
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        Clipboard clipboard = toolkit.getSystemClipboard();
+        String result;
+        try {
+            result = (String) clipboard.getData(DataFlavor.stringFlavor);
+            artistsTextArea.setText(result);
+        } catch (UnsupportedFlavorException | IOException ex) {
+            Logger.getLogger(ApiGui.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_pasteMenuItemActionPerformed
+
+    private void copyMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyMenuItemActionPerformed
+        Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+        String s = artistsTextArea.getSelectedText();
+        StringSelection clipString = new StringSelection(s);
+        clip.setContents(clipString, null);
+    }//GEN-LAST:event_copyMenuItemActionPerformed
+
+    private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
+        artistsTextArea.setText("");
+    }//GEN-LAST:event_clearButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -212,9 +287,13 @@ public class ApiGui extends javax.swing.JFrame {
     private java.awt.TextArea artistsTextArea;
     private javax.swing.JButton checkButton;
     private javax.swing.JButton clearButton;
+    private javax.swing.JMenuItem copyMenuItem;
+    private javax.swing.JLabel destinationFolderLabel;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem pasteMenuItem;
     private javax.swing.JButton sourceButton;
     // End of variables declaration//GEN-END:variables
 }
