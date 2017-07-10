@@ -15,6 +15,9 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -24,6 +27,7 @@ import java.net.URL;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -33,6 +37,9 @@ import org.json.JSONObject;
  * @author albus
  */
 public class ApiGui extends javax.swing.JFrame {
+
+    private File sourceFolderPath = null;
+    private File logFile = null;
 
     /**
      * Creates new form ApiGui
@@ -75,7 +82,11 @@ public class ApiGui extends javax.swing.JFrame {
         });
 
         sourceButton.setText("SOURCE");
-        sourceButton.setEnabled(false);
+        sourceButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sourceButtonActionPerformed(evt);
+            }
+        });
 
         clearButton.setText("CLEAR");
         clearButton.addActionListener(new java.awt.event.ActionListener() {
@@ -165,25 +176,42 @@ public class ApiGui extends javax.swing.JFrame {
         Scanner scanner = null;
         String tmp = "";
         String tmpFormat = "";
+        
+        BufferedWriter bw = null;
+        FileWriter fw = null;
+
+        this.logFile = new File(this.sourceFolderPath + "/UpcChecker.txt");
+
         try {
+
             scanner = new Scanner(artistsTextArea.getText());
+            fw = new FileWriter(this.logFile);
+            bw = new BufferedWriter(fw);
 
             while (scanner.hasNextLine()) {
                 tmp = scanner.nextLine();
                 tmpFormat = String.format("%10s", tmp).replace(' ', '+');
                 link = ("https://itunes.apple.com/search?term=" + tmpFormat + "&entity=musicArtist&media=music");
                 JsonObject json = apiClass.getJson(link);
+                
+                if(json == null){
+                   JOptionPane.showMessageDialog(this, "RATE LIMIT!\nWait a few seconds before resuming the API CALLS\nRefer to the developer for further info", "Error", JOptionPane.ERROR_MESSAGE);
+                   return;
+                }
 
                 int result = json.get("resultCount").getAsInt();
 
                 System.out.println("APIGUI JSON: " + json.toString());
                 System.out.println("RESULTCOUNT: " + result);
+                
+                
+                String checkEquality = "0";
 
                 if (result > 0) {
 
                     //JSONObject jsonObj = new JSONObject(json);
                     JsonArray jArray = json.get("results").getAsJsonArray();
-                    int checkEquallity = 0;
+                    
                     for (int i = 0; i < jArray.size(); i++) {
 
                         JsonObject jsonObjArr = jArray.get(i).getAsJsonObject();
@@ -191,37 +219,57 @@ public class ApiGui extends javax.swing.JFrame {
                         String nameLowerCase = jsonObjArr.get("artistName").getAsString().toLowerCase();
 
                         if (nameLowerCase.equals(tmp.toLowerCase())) {
-                            checkEquallity = 1;
-                            JOptionPane.showMessageDialog(this, "ARTIST FOUND!\n" + nameLowerCase);
-                            return;
+                            checkEquality = "1";
+                            //JOptionPane.showMessageDialog(this, "ARTIST FOUND!\n" + nameLowerCase);
+                            //return;
                         }
 
                     }
 
-                    if (checkEquallity == 0) {
-                        JOptionPane.showMessageDialog(this, "ARTIST NOT FOUND!\n");
-                        return;
+                    //if (checkEquality.equals("0")) {
+                        //JOptionPane.showMessageDialog(this, "ARTIST NOT FOUND!\n");
+                        //return;
 
-                    }
+                    //}
 
                     //JSONArray jArray = new JSONArray(json.get("results"));
                     System.out.println("JARRAY: " + jArray.toString());
-                } else {
-                    JOptionPane.showMessageDialog(this, "ARTIST NOT FOUND!\n");
-                    return;
+                } //else {
+                    //JOptionPane.showMessageDialog(this, "ARTIST NOT FOUND!\n");
+                    //return;
 
-                }
+                //}
+                
+                bw.write(tmp + "," + checkEquality + "\n");
 
             }
 
+        } catch (IOException ex) {
+            Logger.getLogger(ApiGui.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (scanner != null) {
                 scanner.close();
             }
+            
+            try {
+
+                if (bw != null) {
+                    bw.close();
+                }
+
+                if (fw != null) {
+                    fw.close();
+                }
+
+            } catch (IOException ex) {
+
+                ex.printStackTrace();
+
+            }
         }
 
-        JOptionPane.showMessageDialog(this, "ERROR!\nPlease contact the developer", "Error", JOptionPane.ERROR_MESSAGE);
-
+        //JOptionPane.showMessageDialog(this, "ERROR!\nPlease contact the developer", "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, "DONE!");
     }//GEN-LAST:event_checkButtonActionPerformed
 
     private void pasteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pasteMenuItemActionPerformed
@@ -246,6 +294,24 @@ public class ApiGui extends javax.swing.JFrame {
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
         artistsTextArea.setText("");
     }//GEN-LAST:event_clearButtonActionPerformed
+
+    private void sourceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sourceButtonActionPerformed
+        JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(null);
+        chooser.setDialogTitle("Choose a folder");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
+        
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            
+            this.sourceFolderPath = chooser.getSelectedFile();
+            
+            System.out.println("SOURCE: " + this.sourceFolderPath);
+            
+            destinationFolderLabel.setText(this.sourceFolderPath.toString());
+            
+        }
+    }//GEN-LAST:event_sourceButtonActionPerformed
 
     /**
      * @param args the command line arguments

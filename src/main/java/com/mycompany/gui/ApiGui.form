@@ -132,8 +132,10 @@
     <Component class="javax.swing.JButton" name="sourceButton">
       <Properties>
         <Property name="text" type="java.lang.String" value="SOURCE"/>
-        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="sourceButtonActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="clearButton">
       <Properties>

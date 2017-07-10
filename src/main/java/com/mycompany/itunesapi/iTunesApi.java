@@ -39,6 +39,12 @@ public class iTunesApi {
 
             System.out.println("RESPONSE CODE: " + responseCode);
             
+            if(responseCode == 403){
+                
+               return null;
+                
+            }
+            
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(httpCon.getInputStream()));
             String inputLine;
@@ -65,7 +71,12 @@ public class iTunesApi {
     }
     
     
-    
+    private class MyOwnException extends Exception {
+
+        public MyOwnException(String msg) {
+            super(msg);
+        }
+    }
     
     
     
