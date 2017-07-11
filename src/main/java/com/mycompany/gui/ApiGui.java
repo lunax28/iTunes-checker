@@ -191,7 +191,8 @@ public class ApiGui extends javax.swing.JFrame {
             while (scanner.hasNextLine()) {
                 tmp = scanner.nextLine();
                 tmpFormat = String.format("%10s", tmp).replace(' ', '+');
-                link = ("https://itunes.apple.com/search?term=" + tmpFormat + "&entity=musicArtist&media=music");
+                link = ("https://itunes.apple.com/search?term=" + tmpFormat + "&entity=allArtist&attribute=allArtistTerm");
+                System.out.println("LINK: " + link);
                 JsonObject json = apiClass.getJson(link);
                 
                 if(json == null){
@@ -204,7 +205,7 @@ public class ApiGui extends javax.swing.JFrame {
                 System.out.println("APIGUI JSON: " + json.toString());
                 System.out.println("RESULTCOUNT: " + result);
                 
-                
+                int artistId = 0;
                 String checkEquality = "0";
 
                 if (result > 0) {
@@ -219,7 +220,21 @@ public class ApiGui extends javax.swing.JFrame {
                         String nameLowerCase = jsonObjArr.get("artistName").getAsString().toLowerCase();
 
                         if (nameLowerCase.equals(tmp.toLowerCase())) {
-                            checkEquality = "1";
+                            
+                            artistId = jsonObjArr.get("artistId").getAsInt();
+                            System.out.println("ARTIST ID: " + artistId);
+                            System.out.println("I ARRAY: " + i);
+                            
+                            
+                            link = ("https://itunes.apple.com/lookup?id="+ artistId + "&entity=album");
+                            json = apiClass.getJson(link);
+                            
+                            int finalResult = json.get("resultCount").getAsInt();
+                            
+                            if(finalResult > 1){
+                                checkEquality = "1";
+                                
+                            }
                             //JOptionPane.showMessageDialog(this, "ARTIST FOUND!\n" + nameLowerCase);
                             //return;
                         }
